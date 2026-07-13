@@ -1,12 +1,256 @@
-\documentclass{article}
-\title{GPU Accelerated Computing}
-\author{Your Name}
+\documentclass[11pt,a4paper]{article}
+
+% --- Packages ---
+\usepackage[utf8]{inputenc}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+\usepackage{booktabs} % For professional tables
+\usepackage{listings} % For code snippets
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{cite}
+\usepackage{algorithmicx}
+\usepackage{algpseudocode}
+\usepackage{algorithm}
+
+
+% --- Code Listing Style (Optimized for CUDA/C++) ---
+\definecolor{mGreen}{rgb}{0,0.6,0}
+\definecolor{mGray}{rgb}{0.5,0.5,0.5}
+\definecolor{mPurple}{rgb}{0.58,0,0.82}
+\definecolor{backgroundColour}{rgb}{0.95,0.95,0.92}
+
+\lstset{
+    backgroundcolor=\color{backgroundColour},   
+    commentstyle=\color{mGreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{mGray},
+    stringstyle=\color{mPurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2,
+    language=C++
+}
+
+% --- Document Metadata ---
+\title{\textbf{High-Performance Matrix Multiplication on Graphics Processing Units (GPUs)}\\
+\large PhD Course Project Report: \href{https://fabiotosi92.github.io/phd-course-gpu-2026/}{GPU-Acclerated Computing for AI and Computer Vision}}
+\author{\textbf{Fabio A. Ciraci} \\ \small \href{https://github.com/FabioC-alt/GPU-Matrix-Multiplication-Project}{GitHub Repository: GPU-Matrix-Multiplication-Project}}
 \date{\today}
 
 \begin{document}
+
 \maketitle
 
+\begin{abstract}
+
+Matrix multiplication ($C = A \times B$) serves as a fundamental building block in modern scientific computing, deep learning, and computer vision. 
+Achieving peak theoretical performance on modern Graphics Processing Units (GPUs) requires overcoming severe memory bandwidth and instruction-level bottlenecks. 
+This report details the implementation, optimization, and evaluation of various parallel matrix multiplication.
+The firsts test runned are naive CPU implementations of Matrix Multiplication algorithms, while the last is the implementation of a CUDA specific multipication via the CuPy lib.
+All the code is in python. LLMs were used to support code writing and the report.
+
+
+
+
+\end{abstract}
+
 \section{Introduction}
-Testing GPU-Computing Matrix Multiplication
+\label{sec:intro}
+Matrix Multiplication is a core operation in numerous computational tasks, including training Large Language Models (LLMs), climate modeling, and scientific simulations. 
+The General Matrix Multiply (GEMM) operation, which computes the product of two dense matrices, is particularly critical due to its high computational intensity and its role in linear algebra routines that underpin many machine learning algorithms.
+% Matrix Multiplication code
+%----------------------------
+\[
+\begin{bmatrix}
+a & b \\
+c & d
+\end{bmatrix}
+\begin{bmatrix}
+x & y \\
+z & w
+\end{bmatrix}
+=
+\begin{bmatrix}
+ax + bz & ay + bw \\
+cx + dz & cy + dw
+\end{bmatrix}
+\]
+%----------------------------
+
+The Matrix Multiplication algorithm has a time complexity of $O(N^3)$ for naive implementations, where $N$ is the dimension of the square matrices.
+This makes optimization crucial for large-scale applications, especially when leveraging the parallel processing capabilities of GPUs.
+In this report, we explore various implementation of matrix multiplication, from simple naive algorithms to more advanced techniques such as tiling and trasposed.
+
+
+\section{Implementation \& Optimization Strategies}
+\label{sec:implementation}
+This section forms the core technical contribution of your report. Describe each implementation variant step-by-step.
+
+Given the interpreted nature of Python, we leverage the \texttt{Numba} library to JIT-compile our matrix multiplication functions for CPU execution.
+
+To JIT-compile a function, we use the \texttt{@jit} decorator from Numba. This allows us to write Python code that is compiled to machine code at runtime, significantly improving performance.
+\subsection{Baseline CPU Implementation}
+The naive implementation leverages three nested loops to compute the product of two matrices. 
+
+\begin{lstlisting}[language=Python, caption={Baseline Naive CPU Matrix Multiplication in Python}, label={lst:cpu_baseline}]
+import numpy as np
+
+@jit(nopython=True)
+def naive_approach(A, B, C):
+    for i in range(N):
+        for j in range(N):
+            for k in range(N):
+                C[i][j] += A[i][k] * B[k][j]
+
+
+\end{lstlisting}
+
+\subsection{Exploiting Locality principle}
+Using the locality principle, we can improve cache performance by accessing data in a more cache-friendly manner. 
+CPUs pre-load the data into cache line by line, in the naive implementation the A matrix is accessed row-wise, while the B matrix is accessed column-wise, which can lead to cache misses.
+It is then possible to invert the order of the loops to access the B matrix row-wise, which is more cache-friendly and can lead to better performance.
+
+\begin{lstlisting}[language=Python, caption={Baseline Naive CPU Matrix Multiplication with Locality Principle in Python}, label={lst:cpu_locality}]
+@jit(nopython=True)
+def exploiting_locality(A, B, C):
+    for i in range(N):
+        for k in range(N):
+            for j in range(N):
+                C[i][j] += A[i][k] * B[k][j]
+\end{lstlisting}
+
+\subsection{Transposed Approach}
+In the transposed approach, we first transpose the second matrix B before performing the multiplication.
+This allows us to access both matrices in a row-wise manner, which is more cache-friendly and can lead to better performance.
+\begin{lstlisting}[language=Python, caption={Baseline Naive CPU Matrix Multiplication with Locality Principle in Python}, label={lst:cpu_locality_1}]
+@jit(nopython=True)
+def transposed_approach(A, B, C):
+        for i in range(N):
+            for j in range(N):
+                for k in range(N):
+                    C[i][j] += A[i][k] * B[j][k]
+
+## In the main code
+B_t = np.transpose(B).copy()
+transposed_approach(A, B_t, C)
+
+\end{lstlisting}
+
+\subsection{Tiled Matrix Multiplication (Shared Memory)}
+In Tiled Matrix Multiplication, we divide the matrices into smaller sub-matrices (tiles) that fit into the shared memory of the GPU.
+This approach reduces the number of global memory accesses, which are slower than shared memory accesses, and allows for better utilization of the GPU's parallel processing capabilities.
+\begin{lstlisting}[language=Python, basicstyle=\ttfamily\scriptsize, caption={Tiled Matrix Multiplication}, label={lst:tiling}]
+@jit(nopython=True)
+def tiling_approach(A, B, C, block_size):
+    for ih in range(0, N, block_size):
+        for kh in range(0, N, block_size):
+            for jh in range(0, N, block_size):
+                # min in necessary in case the matrix is smaller than the sum of the 
+                # the block and the already reached position
+                for i in range(ih, min(ih + block_size, N)):
+                               for k in range(kh, min(kh + block_size, N)):
+                                              for j in range(jh, min(jh + block_size, N)):
+                                                             C[i][j] += A[i][k] * B[k][j]
+\end{lstlisting}
+
+\subsection{GPU Optimization with CuPy}
+Specialized GPU libraries like CuPy can be used to perform matrix multiplication on the GPU with minimal code changes.
+\begin{lstlisting}[language=Python, basicstyle=\ttfamily\scriptsize, caption={CuPy Implementation}, label={lst:cupy}]
+import cupy as cp  
+
+A = np.random.rand(N, N).astype(np.float32)
+B = np.random.rand(N, N).astype(np.float32)
+C = np.zeros((N, N), dtype=np.float32)
+
+C = cp.dot(A, B)
+cp.cuda.Stream.null.synchronize()
+
+\end{lstlisting}
+
+\section{Hardware Architecture}
+\label{sec:background}
+
+The hardware architecture used for testing and evaluation is both a modern CPU and NVIDIA GPU. 
+The local CPU is an Intel Core i7-12700H with 14 cores (6 performance cores and 8 efficiency cores) and a base clock of 2.3 GHz.
+Local GPU for testing is an NVIDIA RTX 4050 Laptop GPU with 6GB of GDDR6 memory, 2560 CUDA cores, and a base clock of 1.5 GHz.
+
+
+
+
+\section{Experimental Setup}
+Experimental tests in \textit{Table 1} shows interesting results, the JIT compiler enhanced the results of the naive approaches,
+in particular the Naive, Locality Exploitation and Transpose Naive approaches.
+In case of not using the JIT compiler the tiling approach is the best,
+but when using the JIT compiler the Locality performs better. This may be due to the fact that the JIT compiler is not capable of
+translating into low-level code the tiling approach, while it is capable of optimizing the locality approach.
+
+The results obtained by the \textbf{CuPy} library are not reported in the table, but they outperform all the other approaches.
+
+In particular the Execution time is \textbf{69.95 ms}, with a caveat, the CuPy library has a transfer time of \textbf{111.86 ms}, which is the time it takes to transfer the data from the CPU to the GPU and back.
+When transfering very huge matrix this cost is negligible, but when transfering small matrix this cost is very high and can be a bottleneck.
+
+
+\begin{table}[htbp]
+\centering
+\caption{Results of naive approaches with and without JIT-compiler ($N = 512$)}
+\label{tab:matrix_mult_results_combined}
+\begin{tabular}{lrr}
+\toprule
+\textbf{Configuration/Approach} & \textbf{Without JIT (ms)} & \textbf{With JIT (ms)} \\
+\midrule
+Naive                 & 45014.81 & 952.77 \\
+Locality Exploitation & 40713.50 & 97.33  \\
+Transpose Naive       & 40872.50 & 116.37 \\
+\midrule
+\multicolumn{3}{l}{\textbf{Tiling (Block Dimension)}} \\
+\quad Tile 8          & 42968.00 & 41921.99 \\
+\quad Tile 16         & 42771.56 & 40756.99 \\
+\quad Tile 32         & 42471.79 & 40455.29 \\
+\quad Tile 64         & 39289.19 & 39580.47 \\
+\quad Tile 128        & 39916.33 & 40033.89 \\
+\quad Tile 256        & 39080.68 & 40148.99 \\
+\quad Tile 512        & 38009.71 & 40938.10 \\
+\quad Tile 1024       & 39274.97 & 40152.30 \\
+\quad Tile 2048       & 38422.95 & 40186.30 \\
+\quad Tile 4096       & 39302.94 & 40590.50 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{images/ConfrontoSoluzioni_1.png}
+\caption{Comparison of temporal performance (ms) with and without JIT compiler. On the left are the classic approaches, on the right is the behavior of Tiling as the block size varies.}
+\label{fig:jit_comparison}
+\end{figure}
+
+\newpage
+
+\section{Discussion}
+\label{sec:discussion}
+The results shows that on local systems the matrix multiplication is a non-trivial problem, especially when using 
+high-level languages such as Python.
+Even thought the transposed approach is more cache-friendly the \texttt{np.transpose().copy()} function creates a copy of the matrix, thus not really creating a new trasposed version of the matrix, eliminating the benefits of the transposed approach.
+
+The JIT compiler is able to optimize the code and make it run faster, but it is not able to optimize the tiling approach, which is the best approach when not using the JIT compiler.
+The CuPy library is able to optimize the matrix multiplication on the GPU, but it has a transfer time that can be a bottleneck when transfering small matrix.
+
+\section{Conclusion and Future Work}
+\label{sec:conclusion}
+This report has explored various implementations of matrix multiplication, from naive CPU approaches to optimized GPU techniques using CuPy.
+The findings highlight the significant performance gains achievable through JIT compilation and GPU acceleration, while also emphasizing the importance of considering data transfer overheads in GPU computations.
+Future work will could be interesting to explore more advanced GPU optimization techniques in particular on multi-GPU systems, and to investigate the impact of different matrix sizes and shapes on performance.
+
 
 \end{document}

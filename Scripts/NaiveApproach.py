@@ -6,7 +6,7 @@ import numpy as np
 from numba import jit
 
 
-N = 1024
+N = 512  # Dimensione della matrice (N x N)
 
 # Configurazione del Logging per HPC
 # Usiamo sys.stdout per far confluire tutto nel file .out di Slurm in tempo reale
@@ -62,7 +62,7 @@ def transposed_approach(A, B, C):
                     C[i][j] += A[i][k] * B[j][k]
 
 
-@jit(nopython=True)
+#@jit(nopython=True)
 def tiling_approach(A, B, C, block_size):
 
     for ih in range(0, N, block_size):
