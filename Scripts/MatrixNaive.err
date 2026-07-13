@@ -1,0 +1,9 @@
+Traceback (most recent call last):
+  File "/scratch.hpc/fabio.ciraci2/gpuAccProgramming/cupyProgramming.py", line 53, in <module>
+    main()
+  File "/scratch.hpc/fabio.ciraci2/gpuAccProgramming/cupyProgramming.py", line 33, in main
+    cp.cuda.Stream.null.synchronize()
+  File "cupy/cuda/stream.pyx", line 272, in cupy.cuda.stream._BaseStream.synchronize
+  File "cupy_backends/cuda/api/runtime.pyx", line 924, in cupy_backends.cuda.api.runtime.streamSynchronize
+  File "cupy_backends/cuda/api/runtime.pyx", line 146, in cupy_backends.cuda.api.runtime.check_status
+cupy_backends.cuda.api.runtime.CUDARuntimeError: cudaErrorNoDevice: no CUDA-capable device is detected
