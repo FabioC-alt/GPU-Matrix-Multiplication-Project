@@ -25,7 +25,7 @@ def main():
 
     time_transfer = (time.perf_counter() - t_transfer) * 1000
 
-    logging.info(f"Tempo di trasferimento {time_transfer:.4f} ms)")
+    logging.info(f"Tempo di trasferimento {time_transfer:.4f} ms")
 
     logging.info("Esecuzione GPU")
 
@@ -43,9 +43,9 @@ def main():
     time_gpu = (t2-t1) * 1000
 
     logging.info(f"Tempo GPU {time_gpu:.2f} ms")
-    logging.info(f"Controllo Elemento C[0,0]: {C[0][0]:.4fi}")
+    logging.info(f"Controllo Elemento C[0,0]: {C[0][0]:.4f}")
 
-    loggin.info("Esecuzione completata!")
+    logging.info("Esecuzione completata!")
 
 
 

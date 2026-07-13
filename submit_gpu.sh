@@ -22,7 +22,3 @@ TOKEN="8969231949:AAFv9wU0l4OLUZfJgM5m2KcR9WQvhrElOi4"
 CHAT_ID="549421087"
 MESSAGE="Execution Completed!"
 
-curl -s -X POST "https://api.telegram.org/bot$TOKEN/sendMessage" \
-     -d "chat_id=$CHAT_ID" \
-     -d "text=$MESSAGE" \
-     -o /dev/null
