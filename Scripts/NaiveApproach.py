@@ -37,7 +37,7 @@ def matrixes_init():
     return A, B, C
 
 
-@jit(nopython=True)
+#@jit(nopython=True)
 def naive_approach(A, B, C):
 
     for i in range(N):
@@ -45,7 +45,7 @@ def naive_approach(A, B, C):
             for k in range(N):
                 C[i][j] += A[i][k] * B[k][j]
 
-@jit(nopython=True)
+#@jit(nopython=True)
 def exploiting_locality(A, B, C):
 
     for i in range(N):
@@ -53,7 +53,7 @@ def exploiting_locality(A, B, C):
             for j in range(N):
                 C[i][j] += A[i][k] * B[k][j]
 
-@jit(nopython=True)
+#@jit(nopython=True)
 def transposed_approach(A, B, C):
 
         for i in range(N):

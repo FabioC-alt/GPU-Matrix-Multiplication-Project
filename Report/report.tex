@@ -42,7 +42,7 @@
 }
 
 % --- Document Metadata ---
-\title{\textbf{High-Performance Matrix Multiplication on Graphics Processing Units (GPUs)}\\
+\title{\textbf{Matrix Multiplication on Graphics Processing Units}\\
 \large PhD Course Project Report: \href{https://fabiotosi92.github.io/phd-course-gpu-2026/}{GPU-Acclerated Computing for AI and Computer Vision}}
 \author{\textbf{Fabio A. Ciraci} \\ \small \href{https://github.com/FabioC-alt/GPU-Matrix-Multiplication-Project}{GitHub Repository: GPU-Matrix-Multiplication-Project}}
 \date{\today}
@@ -187,18 +187,16 @@ Local GPU for testing is an NVIDIA RTX 4050 Laptop GPU with 6GB of GDDR6 memory,
 
 
 
-\section{Experimental Setup}
-Experimental tests in \textit{Table 1} shows interesting results, the JIT compiler enhanced the results of the naive approaches,
-in particular the Naive, Locality Exploitation and Transpose Naive approaches.
-In case of not using the JIT compiler the tiling approach is the best,
-but when using the JIT compiler the Locality performs better. This may be due to the fact that the JIT compiler is not capable of
-translating into low-level code the tiling approach, while it is capable of optimizing the locality approach.
+\section{Experiments and Results}
+The experiments were conducted on square matrices of size $N = 512$. 
+\textit{Table 1} shows that the naive approach without JIT compilation is the worst performing,
+while the CuPy implementation on the GPU is the best performing, with a significant speedup over the CPU implementations.
 
-The results obtained by the \textbf{CuPy} library are not reported in the table, but they outperform all the other approaches.
+\textit{Figure 1} and \textit{Figure 2} illustrate the performace of each case in JIT and non-JIT compilation, respectively for all
+the tested approaches. The results clearly demonstrate the benefits of JIT compilation and GPU acceleration for matrix multiplication tasks.
 
-In particular the Execution time is \textbf{69.95 ms}, with a caveat, the CuPy library has a transfer time of \textbf{111.86 ms}, which is the time it takes to transfer the data from the CPU to the GPU and back.
-When transfering very huge matrix this cost is negligible, but when transfering small matrix this cost is very high and can be a bottleneck.
-
+In particular, the tiling approach with a block size of 64 achieves the best performance among the CPU implementations, while the CuPy implementation on the GPU outperforms all CPU-based methods by a large margin.
+The tiling approach is so effective that it is able to achieve performance comparable to the CuPy implementation on the GPU, especially when using a block size of 64.
 
 \begin{table}[htbp]
 \centering
@@ -208,43 +206,44 @@ When transfering very huge matrix this cost is negligible, but when transfering 
 \toprule
 \textbf{Configuration/Approach} & \textbf{Without JIT (ms)} & \textbf{With JIT (ms)} \\
 \midrule
-Naive                 & 45014.81 & 952.77 \\
-Locality Exploitation & 40713.50 & 97.33  \\
-Transpose Naive       & 40872.50 & 116.37 \\
+Naive                 & 41834.25 & 794.34  \\
+Locality Exploitation & 40259.05 & 87.05  \\
+Transpose Naive       & 39726.54 & 117.26 \\
+CuPy (GPU)           & 69.95    & 69.95  \\
 \midrule
 \multicolumn{3}{l}{\textbf{Tiling (Block Dimension)}} \\
-\quad Tile 8          & 42968.00 & 41921.99 \\
-\quad Tile 16         & 42771.56 & 40756.99 \\
-\quad Tile 32         & 42471.79 & 40455.29 \\
-\quad Tile 64         & 39289.19 & 39580.47 \\
-\quad Tile 128        & 39916.33 & 40033.89 \\
-\quad Tile 256        & 39080.68 & 40148.99 \\
-\quad Tile 512        & 38009.71 & 40938.10 \\
-\quad Tile 1024       & 39274.97 & 40152.30 \\
-\quad Tile 2048       & 38422.95 & 40186.30 \\
-\quad Tile 4096       & 39302.94 & 40590.50 \\
+\quad Tile 8          & 42781.91 & 214.82 \\
+\quad Tile 16         & 40548.84 & 73.65 \\
+\quad Tile 32         & 39608.49 & 63.54 \\
+\quad Tile 64         & 38973.51 & 62.58 \\
+\quad Tile 128        & 39512.94 & 70.06 \\
+\quad Tile 256        & 39515.65 & 73.93 \\
+\quad Tile 512        & 39332.61 & 64.53 \\
+\quad Tile 1024       & 40025.15 & 63.41 \\
+
 \bottomrule
+
 \end{tabular}
 \end{table}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{images/ConfrontJIT_unified.png}
+\caption{Comparison of temporal performance (ms) with JIT compiler, orderd by execution time.}
+\label{fig:jit_comparison}
+\end{figure}
+
 
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=\textwidth]{images/ConfrontoSoluzioni_1.png}
-\caption{Comparison of temporal performance (ms) with and without JIT compiler. On the left are the classic approaches, on the right is the behavior of Tiling as the block size varies.}
+\includegraphics[width=\textwidth]{images/ConfrontoNon-JIT_unified.png}
+\caption{Comparison of temporal performance (ms) with and without JIT compiler, orderd by execution time.}
 \label{fig:jit_comparison}
 \end{figure}
 
+
 \newpage
-
-\section{Discussion}
-\label{sec:discussion}
-The results shows that on local systems the matrix multiplication is a non-trivial problem, especially when using 
-high-level languages such as Python.
-Even thought the transposed approach is more cache-friendly the \texttt{np.transpose().copy()} function creates a copy of the matrix, thus not really creating a new trasposed version of the matrix, eliminating the benefits of the transposed approach.
-
-The JIT compiler is able to optimize the code and make it run faster, but it is not able to optimize the tiling approach, which is the best approach when not using the JIT compiler.
-The CuPy library is able to optimize the matrix multiplication on the GPU, but it has a transfer time that can be a bottleneck when transfering small matrix.
 
 \section{Conclusion and Future Work}
 \label{sec:conclusion}
