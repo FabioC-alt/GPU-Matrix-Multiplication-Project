@@ -114,7 +114,7 @@ def naive_approach(A, B, C):
 
 \subsection{Exploiting the Locality principle}
 Using the locality principle, we can improve cache performance by accessing data in a more cache-friendly manner. 
-CPUs pre-load the data into cache line by line, in the naive implementation the A matrix is accessed row-wise, while the B matrix is accessed column-wise, which can lead to cache misses.
+CPUs pre-load the data into cache line-by-line, in the naive implementation the A matrix is accessed row-wise, while the B matrix is accessed column-wise, which can lead to cache misses.
 It is then possible to invert the order of the loops to access the B matrix row-wise, which is more cache-friendly and can lead to better performance.
 
 \begin{lstlisting}[language=Python, caption={Baseline Naive CPU Matrix Multiplication with Locality Principle in Python}, label={lst:cpu_locality}]
