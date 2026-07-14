@@ -57,7 +57,7 @@ Matrix multiplication ($C = A \times B$) serves as a fundamental building block 
 Achieving peak theoretical performance on modern Graphics Processing Units (GPUs) requires overcoming severe memory bandwidth and instruction-level bottlenecks. 
 This report details the implementation, optimization, and evaluation of various parallel matrix multiplication.
 The firsts test runned are naive CPU implementations of Matrix Multiplication algorithms, while the last is the implementation of a CUDA specific multipication via the CuPy lib.
-All the code is in python. LLMs were used to support code writing and the report.
+All the code is in python. LLMs were used to support code and the report writing.
 
 
 
@@ -188,16 +188,11 @@ Local GPU for testing is an NVIDIA RTX 4050 Laptop GPU with 6GB of GDDR6 memory,
 
 
 \section{Experiments and Results}
-The experiments were conducted on square matrices of size $N = 512$. 
-\textit{Table 1} shows that the naive approach without JIT compilation is the worst performing,
-while the CuPy implementation on the GPU is the best performing, with a significant speedup over the CPU implementations.
+As shown in \textit{Table 1}, the naive CPU approach without JIT compilation yielded the worst performance. Conversely, the CPU-based tiling approach using a block size of 64 achieved the best performance overall, even comparable to the GPU-accelerated CuPy implementation.
 
-\textit{Figure 1} and \textit{Figure 2} illustrate the performace of each case in JIT and non-JIT compilation, respectively for all
-the tested approaches. The results clearly demonstrate the benefits of JIT compilation and GPU acceleration for matrix multiplication tasks.
+To visualize these performance trends, \textit{Figure 1} and \textit{Figure 2} illustrate the execution times for all tested approaches under JIT and non-JIT compilation, respectively. These results clearly demonstrate the substantial performance benefits of both JIT compilation and GPU acceleration for matrix multiplication tasks.
 
-In particular, the tiling approach with a block size of 64 achieves the best performance among the CPU implementations, while the CuPy implementation on the GPU outperforms all CPU-based methods by a large margin.
-The tiling approach is so effective that it is able to achieve performance comparable to the CuPy implementation on the GPU, especially when using a block size of 64.
-
+Ultimately, the tiling approach with a block size of 64 stood out as the most effective configuration. By optimizing cache locality, this specific setup maximized CPU efficiency to the point of rivaling the dedicated GPU CuPy implementation, making a block size of 64 the optimal choice for these experiments.
 \begin{table}[htbp]
 \centering
 \caption{Results of naive approaches with and without JIT-compiler ($N = 512$)}
@@ -249,7 +244,7 @@ CuPy (GPU)           & 69.95    & 69.95  \\
 \label{sec:conclusion}
 This report has explored various implementations of matrix multiplication, from naive CPU approaches to optimized GPU techniques using CuPy.
 The findings highlight the significant performance gains achievable through JIT compilation and GPU acceleration, while also emphasizing the importance of considering data transfer overheads in GPU computations.
-Future work will could be interesting to explore more advanced GPU optimization techniques in particular on multi-GPU systems, and to investigate the impact of different matrix sizes and shapes on performance.
+Future work will that could be interesting to explore may take in consideration advanced GPU optimization techniques in particular on multi-GPU systems, and to investigate the impact of different matrix sizes and shapes on performance.
 
 
 \end{document}

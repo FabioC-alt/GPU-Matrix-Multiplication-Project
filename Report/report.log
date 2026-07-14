@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.7.13)  13 JUL 2026 17:01
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.7.13)  14 JUL 2026 09:45
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -519,33 +519,33 @@ nput line 105.
 <images/ConfrontJIT_unified.png, id=102, 867.24pt x 505.89pt>
 File: images/ConfrontJIT_unified.png Graphic file (type png)
 <use images/ConfrontJIT_unified.png>
-Package pdftex.def Info: images/ConfrontJIT_unified.png  used on input line 231
+Package pdftex.def Info: images/ConfrontJIT_unified.png  used on input line 226
 .
 (pdftex.def)             Requested size: 452.9679pt x 264.2299pt.
 <images/ConfrontoNon-JIT_unified.png, id=104, 867.24pt x 505.89pt>
 File: images/ConfrontoNon-JIT_unified.png Graphic file (type png)
 <use images/ConfrontoNon-JIT_unified.png>
 Package pdftex.def Info: images/ConfrontoNon-JIT_unified.png  used on input lin
-e 240.
+e 235.
 (pdftex.def)             Requested size: 452.9679pt x 264.2299pt.
  [3] [4
 pdfTeX warning (ext4): destination with the same identifier (name{table.1}) has
  been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.246 \newpage
+l.241 \newpage
               
 pdfTeX warning (ext4): destination with the same identifier (name{figure.1}) ha
 s been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.246 \newpage
+l.241 \newpage
                <./images/ConfrontJIT_unified.png>] [5
 pdfTeX warning (ext4): destination with the same identifier (name{figure.2}) ha
 s been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.255 \end{document}
+l.250 \end{document}
                      <./images/ConfrontoNon-JIT_unified.png>] (./report.aux)
  ***********
 LaTeX2e <2023-11-01> patch level 1
@@ -565,7 +565,7 @@ Here is how much of TeX's memory you used:
  35382 multiletter control sequences out of 15000+600000
  569243 words of font info for 80 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 75i,9n,79p,504b,2180s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 75i,10n,79p,504b,2180s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></us
 r/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/shar
 e/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/share/texl
@@ -578,7 +578,7 @@ sfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts
 /cm/cmti10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cm
 tt10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt8.pf
 b></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt9.pfb>
-Output written on report.pdf (5 pages, 520125 bytes).
+Output written on report.pdf (5 pages, 520138 bytes).
 PDF statistics:
  208 PDF objects out of 1000 (max. 8388607)
  169 compressed objects within 2 object streams
