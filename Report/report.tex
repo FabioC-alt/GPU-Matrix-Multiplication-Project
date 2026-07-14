@@ -56,8 +56,8 @@
 Matrix multiplication ($C = A \times B$) serves as a fundamental building block in modern scientific computing, deep learning, and computer vision. 
 Achieving peak theoretical performance on modern Graphics Processing Units (GPUs) requires overcoming severe memory bandwidth and instruction-level bottlenecks. 
 This report details the implementation, optimization, and evaluation of various parallel matrix multiplication.
-The firsts test runned are naive CPU implementations of Matrix Multiplication algorithms, while the last is the implementation of a CUDA specific multipication via the CuPy lib.
-All the code is in python. LLMs were used to support code and the report writing.
+The first tests were executed are naive CPU implementations of Matrix Multiplication algorithms, while the last is the implementation of a CUDA specific multipication via the CuPy lib.
+All the code is in Python. LLMs were used to support code and the report writing.
 
 
 
@@ -66,10 +66,11 @@ All the code is in python. LLMs were used to support code and the report writing
 
 \section{Introduction}
 \label{sec:intro}
-Matrix Multiplication is a core operation in numerous computational tasks, including training Large Language Models (LLMs), climate modeling, and scientific simulations. 
-The General Matrix Multiply (GEMM) operation, which computes the product of two dense matrices, is particularly critical due to its high computational intensity and its role in linear algebra routines that underpin many machine learning algorithms.
-% Matrix Multiplication code
-%----------------------------
+
+Matrix multiplication is a foundational operation in modern computing, serving as the computational backbone for diverse applications ranging from climate modeling and scientific simulations to the training and inference of Large Language Models (LLMs).
+Among these, the General Matrix Multiply (GEMM) operation, which computes the product of two dense matrices, is especially critical. Because of its high computational intensity, GEMM is the primary performance bottleneck in the linear algebra routines that underpin modern machine learning workloads.
+
+To illustrate, the multiplication of two $2 \times 2$ matrices is defined as:
 \[
 \begin{bmatrix}
 a & b \\
@@ -85,13 +86,10 @@ ax + bz & ay + bw \\
 cx + dz & cy + dw
 \end{bmatrix}
 \]
-%----------------------------
 
-The Matrix Multiplication algorithm has a time complexity of $O(N^3)$ for naive implementations, where $N$ is the dimension of the square matrices.
-This makes optimization crucial for large-scale applications, especially when leveraging the parallel processing capabilities of GPUs.
-In this report, we explore various implementation of matrix multiplication, from simple naive algorithms to more advanced techniques such as tiling and trasposed.
+While conceptually straightforward, a naive implementation of this algorithm scales with a time complexity of $\mathcal{O}(N^3)$ for $N \times N$ square matrices. This cubic complexity makes hardware-level optimization imperative for large-scale applications, particularly when attempting to fully saturate the massive parallel processing capabilities of modern Graphics Processing Units (GPUs). 
 
-
+In this report, we investigate and compare several implementations of matrix multiplication. We begin with the naive CPU baseline and progressively introduce advanced optimization techniques, including shared memory tiling and memory-access optimizations such as matrix transposition.
 \section{Implementation \& Optimization Strategies}
 \label{sec:implementation}
 This section forms the core technical contribution of your report. Describe each implementation variant step-by-step.
@@ -100,8 +98,7 @@ Given the interpreted nature of Python, we leverage the \texttt{Numba} library t
 
 To JIT-compile a function, we use the \texttt{@jit} decorator from Numba. This allows us to write Python code that is compiled to machine code at runtime, significantly improving performance.
 \subsection{Baseline CPU Implementation}
-The naive implementation leverages three nested loops to compute the product of two matrices. 
-
+The most straightforward approach to matrix multiplication is the naive algorithm, which utilizes three nested loops to compute the dot product of rows from matrix $A$ and columns from matrix $B$. While conceptually simple, this baseline implementation is highly inefficient on modern CPU architectures. Because matrix $B$ is accessed column-by-column, the memory access pattern violates spatial locality, resulting in frequent cache misses that severely bottleneck performance.
 \begin{lstlisting}[language=Python, caption={Baseline Naive CPU Matrix Multiplication in Python}, label={lst:cpu_baseline}]
 import numpy as np
 
@@ -115,7 +112,7 @@ def naive_approach(A, B, C):
 
 \end{lstlisting}
 
-\subsection{Exploiting Locality principle}
+\subsection{Exploiting the Locality principle}
 Using the locality principle, we can improve cache performance by accessing data in a more cache-friendly manner. 
 CPUs pre-load the data into cache line by line, in the naive implementation the A matrix is accessed row-wise, while the B matrix is accessed column-wise, which can lead to cache misses.
 It is then possible to invert the order of the loops to access the B matrix row-wise, which is more cache-friendly and can lead to better performance.
